@@ -70,14 +70,21 @@ endif()
 
 # Apply GTK4 support patch (Linux/FreeBSD)
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD") AND GIT_FOUND)
-    message(STATUS "Applying GTK4 support patch to osdialog.")
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace ${CMAKE_CURRENT_SOURCE_DIR}/src/patches/gtk4_support.patch
-        WORKING_DIRECTORY ${OSDIALOG_SRC_DIR}
-        RESULT_VARIABLE GTK4_PATCH_RESULT
-    )
-    if(GTK4_PATCH_RESULT)
-        message(WARNING "GTK4 support patch could not be applied (may already be applied): ${GTK4_PATCH_RESULT}")
+    # Check if patch is already applied by looking for GTK4-specific code
+    file(READ "${OSDIALOG_SRC_DIR}/osdialog_gtk.c" OSDIALOG_GTK_CONTENT)
+    string(FIND "${OSDIALOG_GTK_CONTENT}" "get_active_window" GTK4_PATCH_APPLIED)
+    if(GTK4_PATCH_APPLIED EQUAL -1)
+        message(STATUS "Applying GTK4 support patch to osdialog.")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace ${CMAKE_CURRENT_SOURCE_DIR}/src/patches/gtk4_support.patch
+            WORKING_DIRECTORY ${OSDIALOG_SRC_DIR}
+            RESULT_VARIABLE GTK4_PATCH_RESULT
+        )
+        if(GTK4_PATCH_RESULT)
+            message(WARNING "GTK4 support patch could not be applied: ${GTK4_PATCH_RESULT}")
+        endif()
+    else()
+        message(STATUS "GTK4 support patch already applied to osdialog.")
     endif()
 endif()
 
