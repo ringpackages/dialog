@@ -43,6 +43,7 @@ aPackageInfo = [
 		"lib/windows/arm64/ring_dialog.dll"
 	],
 	:linuxfiles = 	[
+		"src/patches/gtk4_support.patch",
 		"lib/linux/amd64/libring_dialog.so",
 		"lib/linux/arm64/libring_dialog.so",
 		"lib/linux/musl/amd64/libring_dialog.so",
@@ -56,6 +57,7 @@ aPackageInfo = [
 
 	],
 	:freebsdfiles = 	[
+		"src/patches/gtk4_support.patch",
 		"lib/freebsd/amd64/libring_dialog.so",
 		"lib/freebsd/arm64/libring_dialog.so"
 	],
