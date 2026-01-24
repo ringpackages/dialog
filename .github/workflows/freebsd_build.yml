@@ -37,7 +37,7 @@ jobs:
         sync: rsync
         mem: 4096
         prepare: |
-          pkg install -y cmake git ninja pkgconf zenity gtk4
+          pkg install -y cmake git ninja pkgconf gtk4
 
         run: |
           # Clone Ring Language
