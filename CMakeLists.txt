@@ -192,6 +192,7 @@ if(USE_GTK)
     target_compile_definitions(ring_dialog PRIVATE OSDIALOG_GTK)
     target_compile_options(ring_dialog PRIVATE ${GTK_DEFINITIONS})
     target_include_directories(ring_dialog PRIVATE ${GTK_INCLUDE_DIRS})
+    target_link_directories(ring_dialog PRIVATE ${GTK4_LIBRARY_DIRS})
     target_link_libraries(ring_dialog PRIVATE ${GTK_LIBRARIES})
 endif()
 
