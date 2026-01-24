@@ -68,6 +68,19 @@ if(MSVC AND GIT_FOUND)
     endif()
 endif()
 
+# Apply GTK4 support patch (Linux/FreeBSD)
+if((CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD") AND GIT_FOUND)
+    message(STATUS "Applying GTK4 support patch to osdialog.")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace ${CMAKE_CURRENT_SOURCE_DIR}/src/patches/gtk4_support.patch
+        WORKING_DIRECTORY ${OSDIALOG_SRC_DIR}
+        RESULT_VARIABLE GTK4_PATCH_RESULT
+    )
+    if(GTK4_PATCH_RESULT)
+        message(WARNING "GTK4 support patch could not be applied (may already be applied): ${GTK4_PATCH_RESULT}")
+    endif()
+endif()
+
 set(RING_DIALOG_C_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ring_dialog.c"
     "${OSDIALOG_SRC_DIR}/osdialog.c"
@@ -150,23 +163,15 @@ endif()
 
 # Linux backend configuration
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    list(APPEND RING_DIALOG_C_SOURCES "${OSDIALOG_SRC_DIR}/osdialog_gtk.c")
     find_package(PkgConfig REQUIRED)
-    find_program(ZENITY_CMD zenity)
-
-    if(ZENITY_CMD)
-        message(STATUS "Found Zenity, using osdialog_zenity.")
-        list(APPEND RING_DIALOG_C_SOURCES "${OSDIALOG_SRC_DIR}/osdialog_zenity.c")
-    else()
-        message(STATUS "Zenity not found, falling back to GTK4.")
-        pkg_check_modules(GTK4 QUIET gtk4)
-        if (GTK4_FOUND)
-            message(STATUS "Found GTK4, using osdialog_gtk.")
-            list(APPEND RING_DIALOG_C_SOURCES "${OSDIALOG_SRC_DIR}/osdialog_gtk.c")
-            set(USE_GTK4 TRUE)
-        else()
-            message(FATAL_ERROR "Neither Zenity nor GTK4 found. Please install one of them.")
-        endif()
-    endif()
+    
+    pkg_check_modules(GTK4 REQUIRED gtk4)
+    message(STATUS "Found GTK4, using osdialog_gtk.")
+    set(GTK_INCLUDE_DIRS ${GTK4_INCLUDE_DIRS})
+    set(GTK_LIBRARIES ${GTK4_LIBRARIES})
+    set(GTK_DEFINITIONS ${GTK4_CFLAGS_OTHER})
+    set(USE_GTK TRUE)
 endif()
 
 # Create the Ring dialog extension shared library
@@ -182,11 +187,12 @@ target_include_directories(ring_dialog PRIVATE
 # Link Ring library via imported target
 target_link_libraries(ring_dialog PRIVATE Ring::Ring)
 
-# GTK4 configuration (must be after add_library)
-if(USE_GTK4)
-    target_compile_definitions(ring_dialog PRIVATE ${GTK4_DEFINITIONS} OSDIALOG_GTK)
-    target_include_directories(ring_dialog PRIVATE ${GTK4_INCLUDE_DIRS})
-    target_link_libraries(ring_dialog PRIVATE ${GTK4_LIBRARIES})
+# GTK configuration
+if(USE_GTK)
+    target_compile_definitions(ring_dialog PRIVATE OSDIALOG_GTK)
+    target_compile_options(ring_dialog PRIVATE ${GTK_DEFINITIONS})
+    target_include_directories(ring_dialog PRIVATE ${GTK_INCLUDE_DIRS})
+    target_link_libraries(ring_dialog PRIVATE ${GTK_LIBRARIES})
 endif()
 
 # macOS framework linking
