@@ -9,7 +9,7 @@ on:
     - '**/CMakeLists.txt'
     - '.github/workflows/**'
     - '.gitmodules'
-    - 'src/jansson/**'
+    - 'src/**'
   pull_request:
     paths:
     - '**.c'
@@ -17,7 +17,7 @@ on:
     - '**/CMakeLists.txt'
     - '.github/workflows/**'
     - '.gitmodules'
-    - 'src/jansson/**'
+    - 'src/**'
 
 jobs:
   alpine:
