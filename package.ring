@@ -58,8 +58,7 @@ aPackageInfo = [
 	],
 	:freebsdfiles = 	[
 		"src/patches/gtk4_support.patch",
-		"lib/freebsd/amd64/libring_dialog.so",
-		"lib/freebsd/arm64/libring_dialog.so"
+		"lib/freebsd/amd64/libring_dialog.so"
 	],
 	:macosfiles = 	[
 		"lib/macos/amd64/libring_dialog.dylib",
